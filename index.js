@@ -1,11 +1,11 @@
 const express = require('express');
-const app = express();
 
 const mongoose = require('mongoose');
 const session = require('express-session');
 const MongoStore = require('connect-mongo'); 
 const bcrypt = require('bcrypt');
 
+const app = express();
 const dotenv = require('dotenv');
 dotenv.config();
 
@@ -27,7 +27,6 @@ app.use('*', (req, res, next) => {
   
 const userRoute = require('./routes/user');
 const tweetRoute = require('./routes/tweet');
-const statusRoute = require('./routes/status');
 
 // DB CONNECTION
 
@@ -40,7 +39,7 @@ try{
 app.use(express.json());
 app.use('/user',userRoute);
 app.use('/tweet',tweetRoute);
-app.use('/status',statusRoute);
+
 
 const PORT = process.env.PORT || 3000;
 

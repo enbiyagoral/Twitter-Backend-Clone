@@ -9,6 +9,7 @@ module.exports = function(req,res,next){
     try {
         const decodedToken = jwt.verify(token,process.env.JWT_PRIVATE_KEY);
         req.user = decodedToken;
+        console.log(req.user)
         next();
     } catch (ex) {
         res.status(400).send('Hatalı token!');

@@ -22,7 +22,10 @@ const userSchema = new Schema({
         ref: 'Tweet',
         date: Date.now,
     }],
-    followers: [{
+    followed: [{
+        type: Array
+    }],
+    follower: [{
         type: Array
     }],
     liked: [{
