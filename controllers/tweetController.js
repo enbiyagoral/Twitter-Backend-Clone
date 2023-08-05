@@ -7,13 +7,15 @@ async function CreateTweet(req,res){
         username: user._id,
         content: req.body.content
     })
+    
     await tweet.save();
     user.tweets.push(tweet);
     await user.save();
+    
     const s_tweet = await Tweet.findById(tweet._id)
-                                            .populate('username','username').select('content likes dislikes saves date');
+                                            .populate('username','name').select('content likes dislikes saves date');
 
-    res.json({"status":"Tweet oluşturuldu!","Tweet Detayları":s_tweet});   
+    res.json({"status":"Başarılı!","message":"Tweet oluşturuldu.","tweet Detayları":s_tweet});   
 };
 
 async function EditTweet(req,res){ 
@@ -31,18 +33,21 @@ async function EditTweet(req,res){
 
 async function DeleteTweet(req,res){
     const s_user = await Tweet.findById(req.params.id)
-    .populate("username","username")
-    .select("-createdAt -updatedAt");                                            
+                                                    .populate("username","username")
+                                                    .select("-createdAt -updatedAt");                                            
     const tweet = await Tweet.findByIdAndDelete(req.params.id);
     const user = await User.findById(global.userIN);
     var index = user.tweets.indexOf(req.params.id)
+
+ 
     if(index!=-1){
         user.tweets.splice(index,1)
     }else{
-        res.json({"status": "Silme işlemi başarısız!"})
+        res.json({"status":"Hata!","message":"Tweet silinemedi!",s_user})
     }
-    await user.save()
-    res.json({"status":"Tweet silindi!",s_user});
+
+    await user.save();
+    res.json({"status":"Başarılı!","message":"Tweet silindi!",s_user});
 }
 async function ActionTweet(req,res){
     const tweet = await Tweet.findById(req.params.id)
@@ -53,11 +58,15 @@ async function ActionTweet(req,res){
     const {like,dislike,save} = req.body;
 
     if(like){
-        if(!tweet.likes.includes(global.userIN)){
-            tweet.likes.push(global.userIN);
+        var index = tweet.likes.indexOf(global.userIN)
+        if(index==-1){
+            if(!(tweet.likes.includes(global.userIN))){
+                tweet.likes.push(global.userIN);
+            }
+            if(!user.liked.includes(tweet._id)){
+                user.liked.push(tweet._id);
+            };
         }
-        if(!user.liked.includes(tweet._id)){user.liked.push(tweet._id);};
-        
     }else{
         var index = tweet.likes.indexOf(global.userIN);
         var u_index = user.liked.indexOf(tweet._id);
@@ -66,17 +75,19 @@ async function ActionTweet(req,res){
     }
 
     if(dislike){
-        if(!tweet.dislikes.includes(global.userIN)){
-            tweet.dislikes.push(global.userIN);  
-            user.liked.push(tweet._id);    
-        }}
+        var index = tweet.likes.indexOf(global.userIN)
+        if(index==-1){
+            if(!tweet.dislikes.includes(global.userIN)){
+                tweet.dislikes.push(global.userIN);  
+                user.liked.push(tweet._id);    
+            }}
+        }  
     else{
         var index = tweet.dislikes.indexOf(global.userIN);
         tweet.dislikes.splice(index,1);
     }
     
     
-
     if(save){
         if(!tweet.saves.includes(global.userIN)){
             tweet.saves.push(global.userIN);
@@ -92,6 +103,7 @@ async function ActionTweet(req,res){
     
     await user.save();
     await tweet.save();
-    res.send(tweet);
+
+    res.json({"status":"Başarılı!","message":"Aksiyon gerçekleşti","Tweet Bilgileri":tweet});
 }
 module.exports = {CreateTweet,EditTweet,DeleteTweet,ActionTweet};

@@ -15,7 +15,7 @@ async function SignUp(req,res){
     });
     await user.save();
 
-    res.json({"status": "Kullanıcı oluşturuldu!"});
+    res.json({"status": "Başarılı!","message": "Kullanıcı oluşturuldu!"});
 }
 
 async function Login(req,res){
@@ -27,9 +27,9 @@ async function Login(req,res){
         const s_user = await User.findById(user._id).select('name username email');
 
         const token = user.createAuthToken();
-        res.header('x-auth-token',token).json({"Status": "Giriş yapıldı!","User":s_user});
+        res.header('x-auth-token',token).json({"status": "Başarılı!","message": "Giriş yapıldı!","Kullanıcı Bilgileri":s_user});
     }else{
-        res.send("Hatalı şifre!");
+        res.json({"status": "Hata!","message": "Email veya şifre yanlış"});
     };
 }
 
