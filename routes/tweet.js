@@ -5,12 +5,12 @@ const Tweet = require('../model/Tweet');
 const auth = require('../middleware/auth');
 const tweetController = require('../controllers/tweetController');
 
-router.get('/:id', auth, tweetController.ActionTweet);
+router.get('/:id', auth, tweetController.actionTweet);
 
-router.post('/create',  auth, tweetController.CreateTweet);
+router.post('/create',  auth, tweetController.createTweet);
 
-router.put('/edit/:id', auth, tweetController.EditTweet);
+router.put('/edit/:id', auth, tweetController.editTweet);
 
-router.delete('/edit/:id', auth, tweetController.DeleteTweet);
+router.delete('/edit/:id', auth, tweetController.deleteTweet);
 
 module.exports = router;

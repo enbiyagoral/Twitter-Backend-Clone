@@ -15,13 +15,16 @@ const tweetSchema = new Schema({
         default: Date.now
     },
     likes: [{
-        type: Array
+        type: Schema.Types.ObjectId,
+        ref: 'Tweet',
     }],
     dislikes: [{
-        type: Array
+        type: Schema.Types.ObjectId,
+        ref: 'Tweet',
     }],
     saves: [{
-        type: Array
+        type: Schema.Types.ObjectId,
+        ref: 'Tweet',
     }]
 
 },{timestamps:true});

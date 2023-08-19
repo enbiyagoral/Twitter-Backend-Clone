@@ -1,7 +1,7 @@
 const User = require('../model/User');
 const Tweet = require('../model/Tweet');
 
-async function CreateTweet(req,res){
+async function createTweet(req,res){
     const user = await User.findOne({_id:global.userIN});
     const tweet = new Tweet({
         username: user._id,
@@ -18,7 +18,7 @@ async function CreateTweet(req,res){
     res.json({"status":"Başarılı!","message":"Tweet oluşturuldu.","tweet Detayları":s_tweet});   
 };
 
-async function EditTweet(req,res){ 
+async function editTweet(req,res){ 
     const user = await User.findOne({_id:global.userIN});
     const tweet = await Tweet.findById(req.params.id);
     
@@ -31,7 +31,7 @@ async function EditTweet(req,res){
     res.send({"status":"Tweet Düzenlendi!","Tweet Detayları":s_user});
 };
 
-async function DeleteTweet(req,res){
+async function deleteTweet(req,res){
     const s_user = await Tweet.findById(req.params.id)
                                                     .populate("username","username")
                                                     .select("-createdAt -updatedAt");                                            
@@ -49,61 +49,57 @@ async function DeleteTweet(req,res){
     await user.save();
     res.json({"status":"Başarılı!","message":"Tweet silindi!",s_user});
 }
-async function ActionTweet(req,res){
+async function actionTweet(req,res){
     const tweet = await Tweet.findById(req.params.id)
-                                                .populate("username","username")
-                                                .select("-createdAt -updatedAt --v");
-    
-    const user = await User.findById(global.userIN);
-    const {like,dislike,save} = req.body;
+        .populate("username","username")
+        .select("-createdAt -updatedAt --v");
+    const user =  await User.findById(global.userIN);
 
-    if(like){
-        var index = tweet.likes.indexOf(global.userIN)
-        if(index==-1){
-            if(!(tweet.likes.includes(global.userIN))){
-                tweet.likes.push(global.userIN);
-            }
-            if(!user.liked.includes(tweet._id)){
-                user.liked.push(tweet._id);
-            };
-        }
-    }else{
-        var index = tweet.likes.indexOf(global.userIN);
-        var u_index = user.liked.indexOf(tweet._id);
-        tweet.likes.splice(index,1);
-        user.liked.splice(u_index,1); 
-    }
+    const {like,dislike,save} = req.body;   
 
-    if(dislike){
-        var index = tweet.likes.indexOf(global.userIN)
-        if(index==-1){
-            if(!tweet.dislikes.includes(global.userIN)){
-                tweet.dislikes.push(global.userIN);  
-                user.liked.push(tweet._id);    
-            }}
-        }  
-    else{
-        var index = tweet.dislikes.indexOf(global.userIN);
-        tweet.dislikes.splice(index,1);
+    const likeAction = tweet.likes.includes(user_id) ? "$pull":"$push";
+    const dislikeAction = tweet.dislikes.includes(user._id) ? "$pull" : "$push";
+    const saveAction = user.saved.includes(tweet._id) ? "$pull" : "$push";
+
+    if(like!==undefined){
+        await User.findByIdAndUpdate(
+            user._id,
+            {[likeAction] : {liked:tweet._id}},
+            {new: true}
+        );
+        await Tweet.findByIdAndUpdate(
+            req.params.id,
+            {
+                [likeAction]: { likes: user._id },
+                $pull: { dislikes: user._id }
+            },
+            { new: true }
+        );
     }
+    if (dislike !== undefined) {
+        await Tweet.findByIdAndUpdate(
+            req.params.id,
+            { [dislikeAction]: { dislikes: user._id } },
+            { new: true }
+        );
+    };
+    if (save !== undefined) {  
+   
+        await User.findByIdAndUpdate(
+            user._id,
+            { [saveAction]: { saved: tweet._id } },
+            { new: true }
+        );
+
+        await Tweet.findByIdAndUpdate(
+            req.params.id,
+            { [saveAction]: { saves: user._id } },
+            { new: true }
+        );
     
-    
-    if(save){
-        if(!tweet.saves.includes(global.userIN)){
-            tweet.saves.push(global.userIN);
-        }
-        if(!user.saved.includes(tweet._id)){user.saved.push(tweet._id);};
-        
-    }else{
-        index = tweet.saves.indexOf(global.userIN);
-        u_index = user.liked.indexOf(tweet._id);
-        tweet.saves.splice(index,1);
-        user.saved.splice(u_index,1); 
-    }
-    
-    await user.save();
-    await tweet.save();
+    };
+    await Promise.all([user.save(), tweet.save()]);
 
     res.json({"status":"Başarılı!","message":"Aksiyon gerçekleşti","Tweet Bilgileri":tweet});
 }
-module.exports = {CreateTweet,EditTweet,DeleteTweet,ActionTweet};
+module.exports = {createTweet,editTweet,deleteTweet,actionTweet}

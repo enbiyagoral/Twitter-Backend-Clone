@@ -3,7 +3,7 @@ const {createAuthToken} = User;
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 
-async function SignUp(req,res){
+async function signUp(req,res){
 
     const hashedPassword = bcrypt.hashSync(req.body.password,10);
     
@@ -18,7 +18,7 @@ async function SignUp(req,res){
     res.json({"status": "Başarılı!","message": "Kullanıcı oluşturuldu!"});
 }
 
-async function Login(req,res){
+async function login(req,res){
     const {email,password} = req.body;
     let user = await User.findOne({email:email});
     const check = bcrypt.compareSync(password, user.password);
@@ -33,18 +33,18 @@ async function Login(req,res){
     };
 }
 
-async function Logout(req,res){   
+async function logout(req,res){   
     req.session.destroy(()=> {
         res.json({"Status": "Uygulamadan çıkış yapıldı!"});
     });
 }
 
-async function DeleteUser(req,res){
+async function deleteUser(req,res){
     const user = await User.findByIdAndDelete(req.params.id);
     res.json({"Status": "Kullanıcı silindi!"});
 }
 
-async function SavedTweet(req,res){
+async function savedTweet(req,res){
 
     const user = await User.find({_id:global.userIN})
                                                         .populate("saved", "content -_id")
@@ -52,14 +52,14 @@ async function SavedTweet(req,res){
     res.json(user);
 }
 
-async function LikedTweet(req,res){
+async function likedTweet(req,res){
     const user = await User.find({_id:global.userIN})
                                                     .populate("liked", "content -_id")
                                                     .select("username");
     res.json(user);
 }
 
-async function Profile(req,res){
+async function profile(req,res){
     const user = await User.findById(req.params.id);
     const myUser = await User.findById(global.userIN);
     if(global.userIN == user._id){
@@ -100,9 +100,4 @@ async function Profile(req,res){
     }
 };
 
-
-
-    
-     
-
-module.exports = {SignUp, Login, Logout, DeleteUser, SavedTweet, LikedTweet, Profile};
+module.exports = {signUp, login, logout, deleteUser, savedTweet, likedTweet, profile};
