@@ -1,6 +1,8 @@
 const User = require('../model/User');
 const Tweet = require('../model/Tweet');
 
+
+
 async function createTweet(req,res){
     const user = await User.findOne({_id:global.userIN});
     const tweet = new Tweet({
