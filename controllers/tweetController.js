@@ -1,9 +1,9 @@
 const User = require('../model/User');
 const Tweet = require('../model/Tweet');
 const catchAsync = require('../utils/CatchAsync');
+const CustomError = require('../utils/CustomError');
 
-
-exports.createTweet = catchAsync(async(req,res,next)=>{
+exports.createTweet = catchAsync(async(req,res, next)=>{
     const user = await User.findOne({_id:global.userIN});
     const tweet = new Tweet({
         username: user._id,
@@ -20,7 +20,7 @@ exports.createTweet = catchAsync(async(req,res,next)=>{
     res.json({"status":"Başarılı!","message":"Tweet oluşturuldu.","tweet Detayları":s_tweet});   
 });
 
-exports.editTweet = catchAsync(async(req,res,next)=>{
+exports.editTweet = catchAsync(async(req,res, next)=>{
     const user = await User.findOne({_id:global.userIN});
     const tweet = await Tweet.findById(req.params.id);
     
@@ -33,7 +33,7 @@ exports.editTweet = catchAsync(async(req,res,next)=>{
     res.send({"status":"Tweet Düzenlendi!","Tweet Detayları":s_user});
 });
 
-exports.deleteTweet = catchAsync(async(req,res,next)=>{
+exports.deleteTweet = catchAsync(async(req,res, next)=>{
     const s_user = await Tweet.findById(req.params.id)
                                                     .populate("username","username")
                                                     .select("-createdAt -updatedAt");                                            
@@ -86,6 +86,8 @@ exports.actionTweet = catchAsync(async (req, res, next) => {
                 { new: true }
             );
         }
+    } else{
+        throw new CustomError("Tweet değeri boş kaldı!");
     }
 
     if (dislike !== undefined) {
@@ -102,6 +104,8 @@ exports.actionTweet = catchAsync(async (req, res, next) => {
                 { new: true }
             );
         }
+    } else{
+        throw new CustomError("Dislike değeri boş kaldı!");
     }
 
     if (save !== undefined) {
@@ -130,9 +134,16 @@ exports.actionTweet = catchAsync(async (req, res, next) => {
                 { new: true }
             );
         }
+    }else{
+        throw new CustomError("Save değeri boş kaldı!");
     }
 
-    await Promise.all([user.save(), tweet.save()]);
+    await Promise.all([user.save(), tweet.save()])
+    .catch(errorArray => {
+        const customError = new CustomError("Aksiyon gerçekleşmedi!");
+        customError.errors = errorArray; // Hataları özelleştirilmiş hata nesnesine ekleyebilirsiniz
+        throw customError;
+    });
 
     const updatedTweet = await Tweet.findById(req.params.id)
         .populate("username", "username")
