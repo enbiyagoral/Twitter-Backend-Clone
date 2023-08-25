@@ -66,8 +66,8 @@ exports.savedTweet = catchAsync(async(req,res,next)=>{
     const user = await User.find({_id:req.params.id})
     .populate("saved", "content -_id")
     .select("username")
-    .then(()=>{
-        res.json(user);
+    .then((u)=>{
+        res.json(u);
     })
     .catch(()=>{
         return next(new CustomError("Kullanıcı bulunamadı!"));
@@ -79,11 +79,10 @@ exports.likedTweet = catchAsync(async(req,res,next)=>{
     const user = await User.find({_id:req.params.id})
     .populate("liked", "content -_id")
     .select("username")
-    .then(()=>{
-        res.json(user);
-    })
-    .catch(()=>{
-        return next(new CustomError("Kullanıcı bulunamadı!"));
+    .then((u)=>{
+        res.json(u);
+    }).catch(()=>{
+        return next(new CustomError("Kullanıcı bulunamadı!",301));
     })
 });
 
