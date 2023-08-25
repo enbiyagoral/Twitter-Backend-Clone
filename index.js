@@ -11,8 +11,6 @@ const app = express();
 const dotenv = require('dotenv');
 dotenv.config();
 
-// const User = require('./model/User');
-// const Tweet = require('./model/Tweet');
 app.use(session({
     secret: process.env.SESSION_SECRET_KEY,
     resave: false,
@@ -31,7 +29,6 @@ const userRoute = require('./routes/user');
 const tweetRoute = require('./routes/tweet');
 
 // DB CONNECTION
-
 
 try{
     mongoose.connect(process.env.MONGO_URI)

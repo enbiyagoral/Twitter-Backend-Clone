@@ -14,7 +14,8 @@ const logger = createLogger({
     ),
     transports: [
         new transports.Console(),
-        new transports.File({filename:"logs.log", level:"error"}),
+        new transports.File({filename:"logs/logs.log", level:"error"}),
+        new transports.File({filename:"logs/exceptions.log", level:"error",handleExceptions:true,handleRejections:true,maxFiles:"3d"}),
         new transports.MongoDB({
             level: 'error',
             db: process.env.MONGO_URI,
@@ -25,5 +26,15 @@ const logger = createLogger({
         })
     ]
 });
+
+process.on("unhandledRejection",(err)=>{
+    console.log(err.message);
+    logger.log(err.message);
+});
+
+process.on("uncaughtException",(err)=>{
+    console.log(err.message);
+    logger.log(err.message);
+})
 
 module.exports = logger;
