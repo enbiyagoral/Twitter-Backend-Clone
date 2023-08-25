@@ -9,7 +9,7 @@ router.get('/saved/:id', userController.savedTweet);
 router.get('/liked/:id',  userController.likedTweet);
 router.post('/signup',userController.signUp);
 router.post('/login', userController.login);
-router.post('/logout', auth, userController.logout)
+router.post('/logout', userController.logout)
 router.delete('/:id', auth, userController.deleteUser)
 
 module.exports = router;
