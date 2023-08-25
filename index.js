@@ -6,6 +6,7 @@ const MongoStore = require('connect-mongo');
 const bcrypt = require('bcrypt');
 const CustomError = require('./utils/CustomError');
 const globalErrorHandler = require('./controllers/errorController');
+const logger = require('./middleware/logger');
 const app = express();
 const dotenv = require('dotenv');
 dotenv.config();
@@ -31,10 +32,15 @@ const tweetRoute = require('./routes/tweet');
 
 // DB CONNECTION
 
+
 try{
-    mongoose.connect(process.env.MONGO_URI).then(()=>{console.log('MONGO DB CONNECTED!');})
+    mongoose.connect(process.env.MONGO_URI)
+    .then(()=>{
+        logger.info("MONGO DB CONNECTED!");
+    })
 }catch(err){
-    const error = new CustomError(`cannot find ${req.originalUrl} on the server!`,404)
+    const error = new CustomError("CONNECTION FAILED",404)
+    logger.error("CONNECTION FAILED");
     next(error);
 };
 
@@ -48,7 +54,9 @@ app.all('*',(req,res,next)=>{
 app.use(globalErrorHandler);
 const PORT = process.env.PORT || 3000;
 
+
+
 app.listen(PORT,()=>{
-    console.log(`SERVER STARTING ON ${PORT}`);
+    logger.info(`SERVER STARTING ON ${PORT}`);
 });
 

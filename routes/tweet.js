@@ -6,7 +6,7 @@ const checkUser = require('../middleware/checkUser');
 
 router.get('/:id', auth, tweetController.actionTweet);
 
-router.post('/create',  auth, tweetController.createTweet);
+router.post('/create',tweetController.createTweet);
 
 router.put('/edit/:id', checkUser,tweetController.editTweet);
 

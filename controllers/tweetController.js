@@ -4,6 +4,7 @@ const catchAsync = require('../utils/CatchAsync');
 const CustomError = require('../utils/CustomError');
 
 exports.createTweet = catchAsync(async(req,res, next)=>{
+    throw new CustomError("Hataaa");
     const user = await User.findOne({_id:global.userIN});
     const tweet = new Tweet({
         username: user._id,

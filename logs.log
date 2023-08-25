@@ -1,0 +1,55 @@
+{
+  level: 'error',
+  message: 'Hataaa',
+  timestamp: '26-Aug-2023 00:20:51'
+}
+{
+  message: 'MONGO DB CONNECTED!',
+  level: 'info',
+  timestamp: '26-Aug-2023 00:23:04'
+}
+{
+  message: 'MONGO DB CONNECTED!',
+  level: 'info',
+  timestamp: '26-Aug-2023 00:23:19'
+}
+{
+  message: 'SERVER STARTING ON 3000',
+  level: 'info',
+  timestamp: '26-Aug-2023 00:23:23'
+}
+{
+  message: 'MONGO DB CONNECTED!',
+  level: 'info',
+  timestamp: '26-Aug-2023 00:23:26'
+}
+{
+  message: 'SERVER STARTING ON 3000',
+  level: 'info',
+  timestamp: '26-Aug-2023 00:24:22'
+}
+{
+  message: 'MONGO DB CONNECTED!',
+  level: 'info',
+  timestamp: '26-Aug-2023 00:24:47'
+}
+{
+  message: 'SERVER STARTING ON 3000',
+  level: 'info',
+  timestamp: '26-Aug-2023 00:24:58'
+}
+{
+  message: 'MONGO DB CONNECTED!',
+  level: 'info',
+  timestamp: '26-Aug-2023 00:25:01'
+}
+{
+  message: 'SERVER STARTING ON 3000',
+  level: 'info',
+  timestamp: '26-Aug-2023 00:25:26'
+}
+{
+  message: 'MONGO DB CONNECTED!',
+  level: 'info',
+  timestamp: '26-Aug-2023 00:25:30'
+}
