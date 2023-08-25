@@ -2,9 +2,10 @@ const User = require('../model/User');
 const {createAuthToken} = User;
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+const catchAsync = require('../utils/CatchAsync');
+const CustomError = require('../utils/CustomError');
 
-async function signUp(req,res){
-
+exports.signUp = catchAsync(async(req,res,next)=>{
     const hashedPassword = bcrypt.hashSync(req.body.password,10);
     
     let user = new User({
@@ -13,60 +14,85 @@ async function signUp(req,res){
         email: req.body.email,
         password: hashedPassword
     });
-    await user.save();
 
-    res.json({"status": "Başarılı!","message": "Kullanıcı oluşturuldu!"});
-}
+    await user.save()
+    .then(()=>{
+        res.json({"status": "Başarılı!","message": "Kullanıcı oluşturuldu!"});
+    })
+    .catch(()=>{
+        return next(new CustomError('Kayıt olunamadı!'));
+    });
 
-async function login(req,res){
+    
+});
+
+exports.login = catchAsync(async(req,res,next)=>{
     const {email,password} = req.body;
     let user = await User.findOne({email:email});
-    const check = bcrypt.compareSync(password, user.password);
-    if(check){
-        req.session.userID = user._id;
-        const s_user = await User.findById(user._id).select('name username email');
-
-        const token = user.createAuthToken();
-        res.header('x-auth-token',token).json({"status": "Başarılı!","message": "Giriş yapıldı!","Kullanıcı Bilgileri":s_user});
+    if(!user){
+        return next(new CustomError("E-Mail bulunamadı."))
     }else{
-        res.json({"status": "Hata!","message": "Email veya şifre yanlış"});
-    };
-}
+        const check = bcrypt.compareSync(password, user.password);
+        if(check){
+            req.session.userID = user._id;
+            const s_user = await User.findById(user._id).select('name username email');
+    
+            const token = user.createAuthToken();
+            res.header('x-auth-token',token).json({"status": "Başarılı!","message": "Giriş yapıldı!","Kullanıcı Bilgileri":s_user});
+        }else{
+            return next(new CustomError("E-Mail veya şifre yanlış."))
+        };
+    }
+    
+});
 
-async function logout(req,res){   
+exports.logout = catchAsync(async(req,res,next)=>{
     req.session.destroy(()=> {
         res.json({"Status": "Uygulamadan çıkış yapıldı!"});
     });
-}
+});
 
-async function deleteUser(req,res){
-    const user = await User.findByIdAndDelete(req.params.id);
-    res.json({"Status": "Kullanıcı silindi!"});
-}
+exports.deleteUser = catchAsync(async(req,res,next)=>{
+    const user = await User.findByIdAndDelete(req.params.id)
+        .then(()=>{
+            res.json({"Status": "Kullanıcı silindi!"});
+        }).catch(()=>{
+            return next(new CustomError("Kullanıcı silinemedi"));
+        })
+});
 
-async function savedTweet(req,res){
+exports.savedTweet = catchAsync(async(req,res,next)=>{
+    // CHECK USER
+    const user = await User.find({_id:req.params.id})
+    .populate("saved", "content -_id")
+    .select("username")
+    .then(()=>{
+        res.json(user);
+    })
+    .catch(()=>{
+        return next(new CustomError("Kullanıcı bulunamadı!"));
+    })
+    
+});
 
-    const user = await User.find({_id:global.userIN})
-                                                        .populate("saved", "content -_id")
-                                                        .select("username");
-    res.json(user);
-}
+exports.likedTweet = catchAsync(async(req,res,next)=>{
+    const user = await User.find({_id:req.params.id})
+    .populate("liked", "content -_id")
+    .select("username")
+    .then(()=>{
+        res.json(user);
+    })
+    .catch(()=>{
+        return next(new CustomError("Kullanıcı bulunamadı!"));
+    })
+});
 
-async function likedTweet(req,res){
-    const user = await User.find({_id:global.userIN})
-                                                    .populate("liked", "content -_id")
-                                                    .select("username");
-    res.json(user);
-}
-
-async function profile(req,res){
+exports.profile = catchAsync(async(req,res,next)=>{
     const user = await User.findById(req.params.id);
     const myUser = await User.findById(global.userIN);
     if(global.userIN == user._id){
         const s_user = await User.findById(req.params.id).populate('tweets','content').select('name username follower followed');
-        res.json({"user":s_user});
     }else{
-
         const {follow,unfollow} = req.body;
         if(follow === unfollow || follow==true && unfollow==true){
             res.json({"status: ": "İki işlemi aynı anda yapamazsınız!"});
@@ -76,28 +102,28 @@ async function profile(req,res){
         
             if(!myUser.followed.includes(user._id)){ // myuser'in takip ettikleri arasında yoksa alttakileri yap
                myUser.followed.push(user._id);
-               await myUser.save();
             }else{
-                console.log("Takip ediliyor!");
+                return next(new CustomError("Takip ediliyor"));
             }
+            
             if(!user.follower.includes(myUser._id)){ // user'in takipçileri arasında yoksa alttakileri yap
-                user.follower.push(myUser._id);
-                await user.save();         
+                user.follower.push(myUser._id);    
             }
-            res.json({"user": user, "my_user": myUser});
         }else if(unfollow && follow==false){
             if(myUser.followed.includes(user._id)){ // takipten çıkacağı kişi takip edilenleri arasında var mı? varsa çalış
                 var index = myUser.followed.indexOf(user._id);
                 myUser.followed.splice(index,1);
-                await myUser.save();
             if(user.follower.includes(myUser._id)){
                 index = user.follower.indexOf(myUser._id);
                 user.follower.splice(index,1);
-                await user.save();
             }
-            res.json({"user": user, "my_user": myUser});  
+           
         }}   
     }
-};
-
-module.exports = {signUp, login, logout, deleteUser, savedTweet, likedTweet, profile};
+    await Promise.all([myUser.save(),user.save()])
+    .then(()=>{
+        res.json({"user": user, "my_user": myUser});  
+    }).catch(()=>{
+        return next(new CustomError("İşlem gerçekleşmedi."));
+    })
+});  

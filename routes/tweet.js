@@ -1,7 +1,5 @@
 const express = require('express');
 const router = express.Router();
-const User = require('../model/User');
-const Tweet = require('../model/Tweet');
 const auth = require('../middleware/auth');
 const tweetController = require('../controllers/tweetController');
 
