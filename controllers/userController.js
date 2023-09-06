@@ -126,3 +126,4 @@ exports.profile = catchAsync(async(req,res,next)=>{
         return next(new CustomError("İşlem gerçekleşmedi."));
     })
 });  
+//
