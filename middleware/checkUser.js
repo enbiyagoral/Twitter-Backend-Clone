@@ -9,3 +9,5 @@ module.exports = function(req,res,next){
         return next(new CustomError("Yetkiniz yok.",401))
     };
 };
+
+//
